@@ -5,24 +5,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { createRequest } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const Builder = () => {
+  const { siteId } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [input, setInput] = useState('');
+  const [preview, setPreview] = useState<string>('');
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || !siteId) return;
     
     setMessages(prev => [...prev, { role: 'user', content: input }]);
     setInput('');
-    // Here you would typically make an API call to your AI service
-    // For now, we'll just simulate a response
-    setTimeout(() => {
+
+    try {
+      const response = await createRequest({
+        description: input,
+        siteId: siteId
+      });
+
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'This is a simulated AI response.' 
+        content: response.content 
       }]);
-    }, 1000);
+
+      setPreview(response.content);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+      });
+    }
   };
 
   return (
@@ -32,9 +51,15 @@ const Builder = () => {
         <ResizablePanel defaultSize={50}>
           <div className="h-full w-full p-6">
             <Card className="h-full w-full glass">
-              <div className="p-4 text-center">
-                <h2 className="text-2xl font-bold mb-4">Demo Panel</h2>
-                <p>Your preview will appear here</p>
+              <div className="p-4">
+                {preview ? (
+                  <div dangerouslySetInnerHTML={{ __html: preview }} />
+                ) : (
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Demo Panel</h2>
+                    <p>Your preview will appear here</p>
+                  </div>
+                )}
               </div>
             </Card>
           </div>
