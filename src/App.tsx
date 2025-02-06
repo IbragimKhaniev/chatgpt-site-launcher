@@ -10,15 +10,6 @@ import { createSite } from "./lib/api";
 
 const queryClient = new QueryClient();
 
-const CreateSiteRedirect = async () => {
-  try {
-    const site = await createSite();
-    return <Navigate to={`/builder/${site.id}`} replace />;
-  } catch (error) {
-    return <Navigate to="/" replace />;
-  }
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -27,7 +18,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/create-site" element={<CreateSiteRedirect />} />
           <Route path="/builder/:siteId" element={<Builder />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
