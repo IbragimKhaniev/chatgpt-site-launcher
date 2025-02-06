@@ -1,5 +1,6 @@
 export interface CreateSiteResponse {
   id: string;
+  identifier: string;
   createdAt: string;
 }
 
